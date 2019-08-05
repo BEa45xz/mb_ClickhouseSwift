@@ -26,10 +26,9 @@ public class ClickHouseResult : CustomStringConvertible {
         // customized function to allow dynamic lenght queries
         for name in self.block.columns_order {
             if row == nil {
-                result[name] = self.block.columns[name]?.map{ line in return line }
+                result[name] = self.block.columns[name]
             } else {
                 if let val = self.block.columns[name]?[self.current_row] {
-                    
                     result[name] = [val];
                 }
                 
