@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+public class mb_swiftClickhouse {
+    public func text(){
+        
+    }
+}
