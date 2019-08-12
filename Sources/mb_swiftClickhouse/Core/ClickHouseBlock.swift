@@ -129,6 +129,18 @@ public class ClickHouseBlock {
             self.append(name: name, value: t);
         }
     }
+    
+    //Float32
+    public func append(name : String, value : Float32){
+        self.append(name: name, value: [value])
+    }
+    
+    public func append(name : String, value : [ Float32 ]) {
+        for val in value {
+            let t = ClickHouseValue(type: .Float32, number : NSNumber(value : val))
+            self.append(name: name, value: t)
+        }
+    }
 
     // String
     public func append(name : String, value : String) {
