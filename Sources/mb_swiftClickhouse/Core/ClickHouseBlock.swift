@@ -3,15 +3,18 @@ import Foundation
 public class ClickHouseBlock {
     let is_overflows : UInt8;
     let bucket_num   : Int32;
+    var order        : [String];
     var columns       : [String : [ClickHouseValue]] = [:];
 
     public init(is_overflows : UInt8 = 0, bucket_num : Int32 = -1) {
         self.is_overflows = is_overflows;
         self.bucket_num   = bucket_num;
+        self.order        = []
     }
     
     public func append(name : String, value : ClickHouseValue) {
         if (self.columns[name] == nil) {
+            self.order.insert(name, at: 0)
             self.columns[name] = [];
         }
 
@@ -141,6 +144,18 @@ public class ClickHouseBlock {
             self.append(name: name, value: t)
         }
     }
+    
+    //Float64
+    public func append(name : String, value : Float64){
+        self.append(name: name, value: [value])
+    }
+    
+    public func append(name : String, value : [ Float64 ]) {
+        for val in value {
+            let t = ClickHouseValue(type: .Float64, number : NSNumber(value : val))
+            self.append(name: name, value: t)
+        }
+    }
 
     // String
     public func append(name : String, value : String) {
@@ -198,13 +213,26 @@ public class ClickHouseBlock {
 
         buffer.add(UInt64(self.columns.count));
         buffer.add(UInt64(rows));
-
-        for (name, column) in self.columns {
-            let type = column.first!.type;
+        
+        
+//          Deprecated ingestion function as the server expects a definitive
+//          order inside the package. This cannot be provided by a dictionary
+//        for (name, column) in self.columns {
+//            let type = column.first!.type;
+//            buffer.add(name);
+//            buffer.add(type.getName());
+//
+//            ClickHouseBlock.saveColumn(buffer: buffer, type: type, column: column);
+//        }
+        
+        let _ = self.columns.map{ _ in
+            let name = self.order.popLast()!
+            let column = self.columns[name]!
+            let type = column.first!.type.self
             buffer.add(name);
-            buffer.add(type.getName());
-
-            ClickHouseBlock.saveColumn(buffer: buffer, type: type, column: column);
+            buffer.add(type.getName())
+            
+            ClickHouseBlock.saveColumn(buffer: buffer, type: type, column: column)
         }
     }
 
